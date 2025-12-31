@@ -1,0 +1,7 @@
+Technique,AuthBypass,DataExtraction,DBManipulation,SystemCompromise,AvgResponseTime,CPUUsage,MemoryMB,QueryThroughput,ScalabilityScore,ImplementationDifficulty,MaintenanceCost
+Parameterized Queries,100.0,100.0,100.0,100.0,14.8,25.1,149,617,9.2,8.0,2.0
+ORM Framework,100.0,100.0,100.0,94.8,17.3,28.9,162,556,8.5,6.0,4.5
+Stored Procedures,100.0,100.0,94.7,87.5,16.7,27.3,158,584,8.1,8.2,5.5
+Web Application Firewall,91.8,84.6,90.9,78.8,18.7,32.7,168,512,6.3,2.0,8.5
+Input Validation,85.3,62.1,78.4,45.2,15.2,26.8,145,598,8.0,5.5,6.0
+No Protection,0.0,0.0,0.0,0.0,12.4,23.4,142,641,0.0,0.0,0.0
