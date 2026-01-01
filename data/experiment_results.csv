@@ -2,7 +2,6 @@ import pandas as pd
 import json
 import random
 
-# 载入攻击payloads
 with open("src/attacks/sql_injection_payloads.json") as f:
     attacks = json.load(f)
 
